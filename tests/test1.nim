@@ -543,13 +543,13 @@ static:
   ## Block statement
 
   scope:
-
+    let name = ident"name"
     let ast = quote do:
-      block name:
+      block `name`:
         discard
 
     ast.matchAst:
-    of nnkBlockStmt(ident"name", nnkStmtList):
+    of nnkBlockStmt("name", nnkStmtList):
       echo "ok"
 
   ## Asm statement
@@ -647,8 +647,10 @@ static:
 
   scope:
 
+    let a = ident"a"
+
     let ast = quote do:
-      var a = 3
+      var `a` = 3
 
     ast.matchAst:
     of nnkVarSection(
@@ -664,8 +666,10 @@ static:
 
   scope:
 
+    let a = ident"a"
+
     let ast = quote do:
-      let a = 3
+      let `a` = 3
 
     ast.matchAst:
     of nnkLetSection(
@@ -680,9 +684,9 @@ static:
   ## Const section
 
   scope:
-
+    let a = ident"a"
     let ast = quote do:
-      const a = 3
+      const `a` = 3
 
     ast.matchAst:
     of nnkConstSection(
@@ -697,9 +701,9 @@ static:
   ## Type section
 
   scope:
-
+    let A = ident"A"
     let ast = quote do:
-      type A = int
+      type `A` = int
 
     ast.matchAst:
     of nnkTypeSection(
@@ -712,9 +716,9 @@ static:
       echo "ok"
 
   scope:
-
+    let MyInt = ident"MyInt"
     let ast = quote do:
-      type MyInt = distinct int
+      type `MyInt` = distinct int
 
     ast.peelOff({nnkTypeSection}).matchAst:
     of# ...
@@ -728,9 +732,9 @@ static:
       echo "ok"
 
   scope:
-
+    let A = ident"A"
     let ast = quote do:
-      type A[T] = expr1
+      type `A`[T] = expr1
 
     ast.matchAst:
     of nnkTypeSection(
@@ -750,9 +754,9 @@ static:
       echo "ok"
 
   scope:
-
+    let IO = ident"IO"
     let ast = quote do:
-      type IO = object of RootObj
+      type `IO` = object of RootObj
 
     ast.peelOff(nnkTypeSection).matchAst:
     of nnkTypeDef(
@@ -772,9 +776,7 @@ static:
     macro testRecCase(ast: untyped): untyped =
       ast.peelOff({nnkStmtList, nnkTypeSection})[2].matchAst:
       of nnkObjectTy(
-        nnkPragma(
-          ident"inheritable"
-        ),
+        nnkEmpty(),
         nnkEmpty(),
         nnkRecList( # list of object parameters
           nnkIdentDefs(
@@ -824,7 +826,7 @@ static:
 
 
     testRecCase:
-      type Obj[T] = object {.inheritable.}
+      type Obj[T] {.inheritable.} = object
         name: string
         case isFat: bool
         of true:
@@ -874,8 +876,9 @@ static:
 
 
   scope:
+    let MyProc = ident"MyProc"
     let ast = quote do:
-      type MyProc[T] = proc(x: T)
+      type `MyProc`[T] = proc(x: T)
 
     ast.peelOff({nnkStmtList, nnkTypeSection}).matchAst(err):
     of nnkTypeDef(
@@ -946,8 +949,10 @@ static:
     proc hello*[T: SomeInteger](x: int = 3, y: float32): int {.inline.} = discard
 
   scope:
+    let a = ident"a"
+    let b = ident"b"
     var ast = quote do:
-      proc foobar(a, b: int): void
+      proc foobar(`a`, `b`: int): void
 
     ast = ast[3]
 
